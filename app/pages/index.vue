@@ -30,7 +30,7 @@ const featuredEvents = computed(() => events.value.slice(0, 6))
             to="/submit"
             class="rounded-md border border-moss-300 bg-white px-5 py-2.5 text-sm font-semibold text-moss-800 hover:bg-moss-50"
           >
-            Submit an event
+            Add an event
           </NuxtLink>
         </div>
       </div>
@@ -47,10 +47,10 @@ const featuredEvents = computed(() => events.value.slice(0, 6))
       <div v-if="pending" class="text-stone-500">Loading events…</div>
       <div v-else-if="featuredEvents.length === 0" class="rounded-xl border border-dashed border-stone-300 p-10 text-center text-stone-500">
         No upcoming events yet. Be the first to
-        <NuxtLink to="/submit" class="font-medium text-moss-700 hover:underline">submit one</NuxtLink>.
+        <NuxtLink to="/submit" class="font-medium text-moss-700 hover:underline">add one</NuxtLink>.
       </div>
       <div v-else class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <EventCard v-for="event in featuredEvents" :key="event.id" :event="event" />
+        <EventCard v-for="event in featuredEvents" :key="event.path" :event="event" />
       </div>
     </section>
 
@@ -66,7 +66,7 @@ const featuredEvents = computed(() => events.value.slice(0, 6))
           to="/submit"
           class="mt-6 inline-block rounded-md bg-spore-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-spore-700"
         >
-          Submit your event
+          Add your event
         </NuxtLink>
       </div>
     </section>

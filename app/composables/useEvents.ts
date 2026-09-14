@@ -1,11 +1,12 @@
-import type { Database, EventType, MycoEvent } from '~/types/database.types'
+import type { EventItem } from '~/types/event'
+import type { EventType } from '~/utils/eventTypes'
 
 export interface EventFilters {
-  search?: string
-  eventType?: EventType | 'all'
-  country?: string | 'all'
-  mode?: 'all' | 'online' | 'in_person'
-  when?: 'upcoming' | 'past' | 'all'
+  search: string
+  eventType: EventType | 'all'
+  country: string | 'all'
+  mode: 'all' | 'online' | 'in_person'
+  when: 'upcoming' | 'past' | 'all'
 }
 
 const DEFAULT_FILTERS: EventFilters = {
@@ -16,119 +17,65 @@ const DEFAULT_FILTERS: EventFilters = {
   when: 'upcoming'
 }
 
-export function useEvents(initialFilters: EventFilters = {}) {
-  const supabase = useSupabaseClient<Database>()
+export function useAllEvents() {
+  return useAsyncData('all-events', () =>
+    queryCollection('events').order('startDate', 'ASC').all()
+  ) as unknown as { data: Ref<EventItem[] | null>; pending: Ref<boolean>; error: Ref<unknown> }
+}
+
+export function useEvents(initialFilters: Partial<EventFilters> = {}) {
+  const { data: allEvents, pending, error } = useAllEvents()
   const filters = reactive<EventFilters>({ ...DEFAULT_FILTERS, ...initialFilters })
 
-  const events = ref<MycoEvent[]>([])
-  const pending = ref(false)
-  const error = ref<string | null>(null)
+  const events = computed(() => {
+    const now = Date.now()
+    let list = allEvents.value ?? []
 
-  async function fetchEvents() {
-    pending.value = true
-    error.value = null
-
-    let query = supabase
-      .from('events')
-      .select('*')
-      .eq('status', 'approved')
-
-    const now = new Date().toISOString()
     if (filters.when === 'upcoming') {
-      query = query.gte('start_date', now).order('start_date', { ascending: true })
+      list = list.filter((e) => new Date(e.endDate ?? e.startDate).getTime() >= now)
     } else if (filters.when === 'past') {
-      query = query.lt('start_date', now).order('start_date', { ascending: false })
-    } else {
-      query = query.order('start_date', { ascending: true })
+      list = list.filter((e) => new Date(e.endDate ?? e.startDate).getTime() < now)
     }
 
-    if (filters.eventType && filters.eventType !== 'all') {
-      query = query.eq('event_type', filters.eventType)
+    if (filters.eventType !== 'all') {
+      list = list.filter((e) => e.eventType === filters.eventType)
     }
 
-    if (filters.country && filters.country !== 'all') {
-      query = query.eq('country', filters.country)
+    if (filters.country !== 'all') {
+      list = list.filter((e) => e.country === filters.country)
     }
 
     if (filters.mode === 'online') {
-      query = query.eq('is_online', true)
+      list = list.filter((e) => e.isOnline)
     } else if (filters.mode === 'in_person') {
-      query = query.eq('is_online', false)
+      list = list.filter((e) => !e.isOnline)
     }
 
-    if (filters.search) {
-      query = query.or(
-        `title.ilike.%${filters.search}%,description.ilike.%${filters.search}%,city.ilike.%${filters.search}%,country.ilike.%${filters.search}%`
+    if (filters.search.trim()) {
+      const term = filters.search.trim().toLowerCase()
+      list = list.filter((e) =>
+        [e.title, e.description, e.city, e.country, e.venueName]
+          .filter(Boolean)
+          .some((field) => String(field).toLowerCase().includes(term))
       )
     }
 
-    const { data, error: err } = await query
+    const sorted = [...list].sort(
+      (a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+    )
+    return filters.when === 'past' ? sorted.reverse() : sorted
+  })
 
-    if (err) {
-      error.value = err.message
-      events.value = []
-    } else {
-      events.value = data ?? []
-    }
-
-    pending.value = false
-  }
-
-  watch(
-    filters,
-    () => {
-      fetchEvents()
-    },
-    { deep: true }
-  )
-
-  onMounted(fetchEvents)
-
-  return { events, filters, pending, error, refresh: fetchEvents }
+  return { events, filters, pending, error }
 }
 
-export function useEventBySlug(slug: string) {
-  const supabase = useSupabaseClient<Database>()
-  const event = ref<MycoEvent | null>(null)
-  const pending = ref(true)
-  const error = ref<string | null>(null)
-
-  async function load() {
-    pending.value = true
-    const { data, error: err } = await supabase
-      .from('events')
-      .select('*')
-      .eq('slug', slug)
-      .maybeSingle()
-
-    if (err) {
-      error.value = err.message
-    } else {
-      event.value = data
-    }
-    pending.value = false
-  }
-
-  onMounted(load)
-
-  return { event, pending, error, refresh: load }
+export function useEventByPath(path: string) {
+  return useAsyncData(`event-${path}`, () =>
+    queryCollection('events').path(path).first()
+  ) as unknown as { data: Ref<EventItem | null>; pending: Ref<boolean>; error: Ref<unknown> }
 }
 
-export async function fetchApprovedCountries(): Promise<string[]> {
-  const supabase = useSupabaseClient<Database>()
-  const { data } = await supabase
-    .from('events')
-    .select('country')
-    .eq('status', 'approved')
-    .not('country', 'is', null)
-
-  const unique = new Set((data ?? []).map((row) => row.country as string))
+export function uniqueCountries(events: EventItem[]): string[] {
+  const unique = new Set(events.map((e) => e.country).filter(Boolean) as string[])
   return Array.from(unique).sort((a, b) => a.localeCompare(b))
-}
-
-export function flyerPublicUrl(path: string | null | undefined): string | null {
-  if (!path) return null
-  const supabase = useSupabaseClient<Database>()
-  const { data } = supabase.storage.from('flyers').getPublicUrl(path)
-  return data.publicUrl
 }

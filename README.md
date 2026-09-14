@@ -1,76 +1,83 @@
 # Global Mycology Events
 
 A community calendar for domestic and international mycological events —
-forays, conferences, workshops, club meetings and festivals — where
-organizers can post events with flyers/posters and share them with the
-public.
+forays, conferences, workshops, club meetings and festivals.
 
-Built with [Nuxt 4](https://nuxt.com) and [Supabase](https://supabase.com)
-(Postgres, Auth, Storage).
+Built as a **static site** with [Nuxt 4](https://nuxt.com) and
+[Nuxt Content](https://content.nuxt.com): events are plain markdown files
+in this repo, and anyone can add one by opening a pull request — no
+database, login, or backend required.
+
+> A Supabase-backed version (accounts, a submission form with flyer
+> uploads, and an admin approval queue) is on hold for later — see
+> [`supabase/migrations/0001_init.sql`](./supabase/migrations/0001_init.sql)
+> if you want to pick that back up.
 
 ## Features
 
 - 🗓️ **Global calendar** — browse a month calendar or a filterable list of
   upcoming/past events by type, country, and online vs. in-person.
-- 📄 **Event pages** — each event gets its own shareable page with the
-  flyer/poster image, description, dates, location and links.
-- 📬 **Public submissions** — anyone with an account can submit an event
-  with a flyer upload; submissions are reviewed before going live.
-- 🔐 **Passwordless auth** — sign in with an email magic link (Supabase
-  Auth).
-- ✅ **Moderation queue** — admins approve or reject pending submissions
-  from `/admin`.
-- 👤 **My Events** — organizers can view, edit and delete their own
-  submissions.
+- 📄 **Event pages** — each event gets its own shareable page with an
+  optional flyer/poster image, description, dates, location and links.
+- 📬 **Markdown-based submissions** — `/submit` walks anyone through
+  adding an event as a pull request, with a copy-paste template and a
+  pre-filled "create file on GitHub" link.
+- ⚡ **Fully static** — no server, database or environment variables to
+  configure. Deploys anywhere that serves static files.
 
 ## Project structure
 
 ```
+content/events/*.md    One markdown file per event (frontmatter + description)
 app/
-  components/     EventCard, EventCalendar, EventFilters, header/footer
-  composables/     useEvents, useProfile (Supabase data access)
-  layouts/         default layout (header + footer)
-  pages/           /, /events, /events/[slug], /submit, /login, /confirm,
-                   /my-events, /my-events/[id]/edit, /admin
-  types/           database.types.ts — hand-written types matching the schema
-  utils/           slugify, date formatting, event type labels
-supabase/
-  migrations/0001_init.sql   full schema, RLS policies, storage bucket
+  components/          EventCard, EventCalendar, EventFilters, header/footer
+  composables/          useEvents, useAllEvents, useEventByPath (Nuxt Content queries)
+  layouts/              default layout (header + footer)
+  pages/                /, /events, /events/[...slug], /submit
+  types/event.ts         EventItem shape
+  utils/                 event type labels, date formatting
+content.config.ts       Nuxt Content collection schema for events
+public/flyers/          Flyer/poster images referenced from event frontmatter
+supabase/                On hold — schema for a future Supabase-backed version
 ```
 
-## 1. Create a Supabase project
+## Adding an event
 
-1. Create a project at [supabase.com](https://supabase.com).
-2. In the SQL editor, run the contents of
-   [`supabase/migrations/0001_init.sql`](./supabase/migrations/0001_init.sql).
-   This creates:
-   - `profiles` (auto-created for each new auth user via a trigger)
-   - `events` (with `pending` / `approved` / `rejected` status)
-   - Row Level Security policies so the public only sees approved events,
-     organizers can manage their own submissions, and only admins can
-     change an event's status
-   - A public `flyers` storage bucket for flyer/poster uploads
-3. In **Authentication → URL Configuration**, add your site URL (and
-   `http://localhost:3000` for local dev) to the redirect allow list so
-   magic-link emails work.
-4. Grant yourself admin access so you can review submissions — after
-   signing in once on the site, run in the SQL editor:
-   ```sql
-   update public.profiles set is_admin = true where id = 'YOUR-USER-UUID';
+See the in-app guide at `/submit`, or directly:
+
+1. Add a new file to `content/events/` named e.g. `2026-your-event.md`.
+2. Fill in the frontmatter:
+
+   ```yaml
+   ---
+   title: "Your Event Name"
+   eventType: foray # foray | conference | workshop | festival | club_meeting | expo | other
+   startDate: "2026-10-10T09:00:00-07:00"
+   endDate: "2026-10-12T17:00:00-07:00"
+   timezone: "America/Los_Angeles"
+   isOnline: false
+   venueName: "Example Nature Center"
+   address: "123 Forest Rd"
+   city: "Portland"
+   region: "Oregon"
+   country: "United States"
+   websiteUrl: "https://example.org"
+   contactEmail: "organizer@example.org"
+   flyer: "/flyers/your-event.jpg"
+   organizer: "Your Mycological Society"
+   ---
+   Everything after the frontmatter is the event description (markdown supported).
    ```
-   (find your user UUID under **Authentication → Users**).
 
-## 2. Configure environment variables
+3. (Optional) drop a flyer/poster image in `public/flyers/` and reference
+   it in the `flyer` field.
+4. Open a pull request. Once merged, the event appears on the calendar
+   automatically — no rebuild steps needed beyond the normal deploy.
 
-Copy `.env.example` to `.env` and fill in your project's API URL and anon
-key (**Project Settings → API**):
+For online events, set `isOnline: true` and use `onlineUrl` instead of a
+venue/address/city.
 
-```
-SUPABASE_URL=https://your-project-ref.supabase.co
-SUPABASE_KEY=your-anon-public-key
-```
-
-## 3. Run locally
+## Run locally
 
 ```bash
 npm install
@@ -79,40 +86,26 @@ npm run dev
 
 The site runs at `http://localhost:3000`.
 
-## 4. Build for production
+## Build a static site
 
 ```bash
-npm run build
-npm run preview
+npm run generate
+npx serve .output/public   # preview locally
 ```
 
-Deploy the `.output` directory to any Node host (or use `npm run generate`
-for static hosting, keeping in mind the calendar/event data is always
-fetched live from Supabase).
+`npm run generate` prerenders every page — including one page per event,
+discovered automatically by crawling links from the homepage and calendar
+— into `.output/public` as plain HTML/CSS/JS.
 
 ## Deploying to Netlify
 
-This repo is pre-configured for Netlify (`netlify.toml` + a `netlify`
-Nitro preset in `nuxt.config.ts`):
+`netlify.toml` is already configured:
 
-1. Create a new site on Netlify from this GitHub repo. Netlify will pick
-   up `netlify.toml` automatically (`npm run build`, publish `dist`).
-2. In **Site configuration → Environment variables**, add:
-   - `SUPABASE_URL`
-   - `SUPABASE_KEY`
-3. Trigger a deploy. Netlify builds an on-demand server function for SSR
-   plus static assets — no extra configuration needed.
-4. Also add your Netlify site URL to Supabase's **Authentication → URL
-   Configuration** redirect allow list so magic-link sign-in works in
-   production.
+```toml
+[build]
+  command = "npm run generate"
+  publish = ".output/public"
+```
 
-## Notes on moderation & RLS
-
-- New events are inserted with `status = 'pending'` and are only visible
-  to their organizer until an admin approves them.
-- A database trigger (`enforce_event_status_change`) prevents anyone but
-  an admin (`profiles.is_admin = true`) from changing an event's status,
-  even if someone calls the API directly.
-- Flyer/poster images live in the public `flyers` storage bucket; anyone
-  can read them, but only signed-in users can upload, and only the owner
-  can replace/delete their own files.
+Just connect this repo to a Netlify site — no environment variables are
+required for the static build.

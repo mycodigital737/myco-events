@@ -1,4 +1,11 @@
-import type { EventType } from '~/types/database.types'
+export type EventType =
+  | 'foray'
+  | 'conference'
+  | 'workshop'
+  | 'festival'
+  | 'club_meeting'
+  | 'expo'
+  | 'other'
 
 export const EVENT_TYPE_LABELS: Record<EventType, string> = {
   foray: 'Foray',

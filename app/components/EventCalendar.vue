@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { MycoEvent } from '~/types/database.types'
+import type { EventItem } from '~/types/event'
 
-const props = defineProps<{ events: MycoEvent[] }>()
+const props = defineProps<{ events: EventItem[] }>()
 const selectedDate = defineModel<string | null>('selectedDate', { default: null })
 
 const today = new Date()
@@ -20,10 +20,10 @@ function toKey(d: Date) {
 }
 
 const eventsByDay = computed(() => {
-  const map = new Map<string, MycoEvent[]>()
+  const map = new Map<string, EventItem[]>()
   for (const event of props.events) {
-    const start = new Date(event.start_date)
-    const end = event.end_date ? new Date(event.end_date) : start
+    const start = new Date(event.startDate)
+    const end = event.endDate ? new Date(event.endDate) : start
     const cursor = new Date(start.getFullYear(), start.getMonth(), start.getDate())
     const last = new Date(end.getFullYear(), end.getMonth(), end.getDate())
     let guard = 0

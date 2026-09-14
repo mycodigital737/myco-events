@@ -1,11 +1,9 @@
 <script setup lang="ts">
 const { events, filters, pending, error } = useEvents()
-const countries = ref<string[]>([])
+const { data: allEvents } = useAllEvents()
 const selectedDate = ref<string | null>(null)
 
-onMounted(async () => {
-  countries.value = await fetchApprovedCountries()
-})
+const countries = computed(() => uniqueCountries(allEvents.value ?? []))
 
 function eventDateKey(iso: string) {
   const d = new Date(iso)
@@ -15,8 +13,8 @@ function eventDateKey(iso: string) {
 const visibleEvents = computed(() => {
   if (!selectedDate.value) return events.value
   return events.value.filter((event) => {
-    const start = eventDateKey(event.start_date)
-    const end = event.end_date ? eventDateKey(event.end_date) : start
+    const start = eventDateKey(event.startDate)
+    const end = event.endDate ? eventDateKey(event.endDate) : start
     return selectedDate.value! >= start && selectedDate.value! <= end
   })
 })
@@ -38,7 +36,7 @@ const visibleEvents = computed(() => {
         <EventFilters v-model="filters" :countries="countries" />
 
         <div v-if="pending" class="text-stone-500">Loading events…</div>
-        <div v-else-if="error" class="rounded-md bg-red-50 p-4 text-red-700">{{ error }}</div>
+        <div v-else-if="error" class="rounded-md bg-red-50 p-4 text-red-700">Something went wrong loading events.</div>
         <div
           v-else-if="visibleEvents.length === 0"
           class="rounded-xl border border-dashed border-stone-300 p-10 text-center text-stone-500"
@@ -46,7 +44,7 @@ const visibleEvents = computed(() => {
           No events match your filters.
         </div>
         <div v-else class="grid gap-4 sm:grid-cols-2">
-          <EventCard v-for="event in visibleEvents" :key="event.id" :event="event" />
+          <EventCard v-for="event in visibleEvents" :key="event.path" :event="event" />
         </div>
       </div>
     </div>

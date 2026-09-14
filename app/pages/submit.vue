@@ -1,219 +1,124 @@
 <script setup lang="ts">
-import { EVENT_TYPE_OPTIONS } from '~/utils/eventTypes'
+const config = useRuntimeConfig()
 
-const supabase = useSupabaseClient()
-const user = useSupabaseUser()
+const template = `---
+title: "Your Event Name"
+eventType: foray
+startDate: "2026-10-10T09:00:00-07:00"
+endDate: "2026-10-12T17:00:00-07:00"
+timezone: "America/Los_Angeles"
+isOnline: false
+venueName: "Example Nature Center"
+address: "123 Forest Rd"
+city: "Portland"
+region: "Oregon"
+country: "United States"
+websiteUrl: "https://example.org"
+contactEmail: "organizer@example.org"
+flyer: "/flyers/your-event.jpg"
+organizer: "Your Mycological Society"
+---
 
-const form = reactive({
-  title: '',
-  description: '',
-  event_type: 'foray',
-  start_date: '',
-  end_date: '',
-  timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-  is_online: false,
-  online_url: '',
-  venue_name: '',
-  address: '',
-  city: '',
-  region: '',
-  country: '',
-  website_url: '',
-  contact_email: ''
-})
+Describe your event here — what to expect, who it's for, what to bring.
+This text (and any markdown formatting) becomes the event's description.
+`
 
-const flyerFile = ref<File | null>(null)
-const submitting = ref(false)
-const errorMsg = ref<string | null>(null)
+const githubNewFileUrl = computed(
+  () =>
+    `https://github.com/${config.public.githubRepo}/new/main/content/events?filename=your-event.md&value=${encodeURIComponent(template)}`
+)
 
-function onFileChange(e: Event) {
-  const target = e.target as HTMLInputElement
-  flyerFile.value = target.files?.[0] ?? null
-}
-
-async function handleSubmit() {
-  errorMsg.value = null
-
-  if (!user.value) {
-    navigateTo('/login')
-    return
-  }
-
-  if (!form.start_date) {
-    errorMsg.value = 'Please choose a start date.'
-    return
-  }
-
-  submitting.value = true
-
-  let flyer_path: string | null = null
-
-  try {
-    if (flyerFile.value) {
-      const ext = flyerFile.value.name.split('.').pop()
-      const path = `${user.value.id}/${crypto.randomUUID()}.${ext}`
-      const { error: uploadError } = await supabase.storage
-        .from('flyers')
-        .upload(path, flyerFile.value, { upsert: false })
-
-      if (uploadError) throw uploadError
-      flyer_path = path
-    }
-
-    const slug = slugWithSuffix(form.title)
-
-    const { data, error: insertError } = await supabase
-      .from('events')
-      .insert({
-        organizer_id: user.value.id,
-        title: form.title,
-        slug,
-        description: form.description,
-        event_type: form.event_type as any,
-        start_date: new Date(form.start_date).toISOString(),
-        end_date: form.end_date ? new Date(form.end_date).toISOString() : null,
-        timezone: form.timezone,
-        is_online: form.is_online,
-        online_url: form.is_online ? form.online_url || null : null,
-        venue_name: form.is_online ? null : form.venue_name || null,
-        address: form.is_online ? null : form.address || null,
-        city: form.is_online ? null : form.city || null,
-        region: form.is_online ? null : form.region || null,
-        country: form.is_online ? null : form.country || null,
-        website_url: form.website_url || null,
-        contact_email: form.contact_email || null,
-        flyer_path
-      })
-      .select('slug')
-      .single()
-
-    if (insertError) throw insertError
-
-    navigateTo(`/events/${data.slug}`)
-  } catch (err: any) {
-    errorMsg.value = err.message ?? 'Something went wrong submitting your event.'
-  } finally {
-    submitting.value = false
+const copied = ref(false)
+function copyTemplate() {
+  if (import.meta.client) {
+    navigator.clipboard.writeText(template)
+    copied.value = true
+    setTimeout(() => (copied.value = false), 2000)
   }
 }
 </script>
 
 <template>
-  <div class="mx-auto max-w-2xl px-4 py-10 sm:px-6">
-    <h1 class="font-display text-3xl font-bold text-stone-900">Submit an event</h1>
+  <div class="mx-auto max-w-3xl px-4 py-10 sm:px-6">
+    <h1 class="font-display text-3xl font-bold text-stone-900">Add an event</h1>
     <p class="mt-2 text-stone-600">
-      Share your foray, conference, workshop or festival with the global
-      mycology community. Submissions are reviewed before they appear on the
-      public calendar.
+      This calendar is powered by plain markdown files in our
+      <a
+        :href="`https://github.com/${config.public.githubRepo}/tree/main/content/events`"
+        target="_blank"
+        rel="noopener"
+        class="font-medium text-moss-700 hover:underline"
+        >GitHub repository</a
+      >. Adding your foray, conference, workshop or festival is a two-minute
+      pull request — no account or sign-in needed here, just a (free)
+      GitHub account.
     </p>
 
-    <div v-if="!user" class="mt-6 rounded-md bg-amber-50 p-4 text-sm text-amber-800">
-      You need to
-      <NuxtLink to="/login" class="font-semibold underline">sign in</NuxtLink>
-      before submitting an event.
-    </div>
-
-    <form v-else class="mt-8 space-y-5" @submit.prevent="handleSubmit">
-      <div>
-        <label class="mb-1 block text-sm font-medium text-stone-700">Event title *</label>
-        <input v-model="form.title" required type="text" class="input" />
-      </div>
-
-      <div>
-        <label class="mb-1 block text-sm font-medium text-stone-700">Description</label>
-        <textarea v-model="form.description" rows="5" class="input"></textarea>
-      </div>
-
-      <div class="grid gap-4 sm:grid-cols-2">
+    <ol class="mt-8 space-y-6">
+      <li class="flex gap-4">
+        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-moss-700 text-sm font-bold text-white">1</span>
         <div>
-          <label class="mb-1 block text-sm font-medium text-stone-700">Event type</label>
-          <select v-model="form.event_type" class="input">
-            <option v-for="opt in EVENT_TYPE_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
-          </select>
-        </div>
-        <div>
-          <label class="mb-1 block text-sm font-medium text-stone-700">Timezone</label>
-          <input v-model="form.timezone" type="text" class="input" />
-        </div>
-      </div>
-
-      <div class="grid gap-4 sm:grid-cols-2">
-        <div>
-          <label class="mb-1 block text-sm font-medium text-stone-700">Start date &amp; time *</label>
-          <input v-model="form.start_date" required type="datetime-local" class="input" />
-        </div>
-        <div>
-          <label class="mb-1 block text-sm font-medium text-stone-700">End date &amp; time</label>
-          <input v-model="form.end_date" type="datetime-local" class="input" />
-        </div>
-      </div>
-
-      <div class="flex items-center gap-2">
-        <input id="is_online" v-model="form.is_online" type="checkbox" class="h-4 w-4 rounded border-stone-300" />
-        <label for="is_online" class="text-sm font-medium text-stone-700">This is an online event</label>
-      </div>
-
-      <div v-if="form.is_online">
-        <label class="mb-1 block text-sm font-medium text-stone-700">Online join URL</label>
-        <input v-model="form.online_url" type="url" placeholder="https://…" class="input" />
-      </div>
-
-      <template v-else>
-        <div>
-          <label class="mb-1 block text-sm font-medium text-stone-700">Venue name</label>
-          <input v-model="form.venue_name" type="text" class="input" />
-        </div>
-        <div>
-          <label class="mb-1 block text-sm font-medium text-stone-700">Address</label>
-          <input v-model="form.address" type="text" class="input" />
-        </div>
-        <div class="grid gap-4 sm:grid-cols-3">
-          <div>
-            <label class="mb-1 block text-sm font-medium text-stone-700">City</label>
-            <input v-model="form.city" type="text" class="input" />
-          </div>
-          <div>
-            <label class="mb-1 block text-sm font-medium text-stone-700">Region / State</label>
-            <input v-model="form.region" type="text" class="input" />
-          </div>
-          <div>
-            <label class="mb-1 block text-sm font-medium text-stone-700">Country</label>
-            <input v-model="form.country" type="text" class="input" />
+          <p class="font-medium text-stone-900">Copy the event template</p>
+          <p class="text-sm text-stone-600">Fill in your event's details in this frontmatter format.</p>
+          <div class="relative mt-2">
+            <pre class="overflow-x-auto rounded-lg bg-stone-900 p-4 text-xs leading-relaxed text-stone-100"><code>{{ template }}</code></pre>
+            <button
+              type="button"
+              class="absolute right-2 top-2 rounded-md bg-stone-700 px-2 py-1 text-xs font-medium text-white hover:bg-stone-600"
+              @click="copyTemplate"
+            >
+              {{ copied ? 'Copied!' : 'Copy' }}
+            </button>
           </div>
         </div>
-      </template>
+      </li>
 
-      <div class="grid gap-4 sm:grid-cols-2">
+      <li class="flex gap-4">
+        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-moss-700 text-sm font-bold text-white">2</span>
         <div>
-          <label class="mb-1 block text-sm font-medium text-stone-700">Event website</label>
-          <input v-model="form.website_url" type="url" placeholder="https://…" class="input" />
+          <p class="font-medium text-stone-900">Create the file on GitHub</p>
+          <p class="text-sm text-stone-600">
+            Click below to open a new file, pre-filled with the template, directly in
+            <code class="rounded bg-stone-100 px-1 py-0.5">content/events/</code>. Rename the file to
+            something like <code class="rounded bg-stone-100 px-1 py-0.5">2026-your-event-name.md</code>,
+            edit the details, then scroll down and choose
+            <strong>"Create a new branch and start a pull request."</strong>
+          </p>
+          <a
+            :href="githubNewFileUrl"
+            target="_blank"
+            rel="noopener"
+            class="mt-3 inline-block rounded-md bg-moss-700 px-4 py-2 text-sm font-semibold text-white hover:bg-moss-800"
+          >
+            Create event file on GitHub ↗
+          </a>
         </div>
+      </li>
+
+      <li class="flex gap-4">
+        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-moss-700 text-sm font-bold text-white">3</span>
         <div>
-          <label class="mb-1 block text-sm font-medium text-stone-700">Contact email</label>
-          <input v-model="form.contact_email" type="email" class="input" />
+          <p class="font-medium text-stone-900">(Optional) Add a flyer or poster</p>
+          <p class="text-sm text-stone-600">
+            Upload your flyer image to
+            <code class="rounded bg-stone-100 px-1 py-0.5">public/flyers/</code>
+            in the same pull request, and reference it in the
+            <code class="rounded bg-stone-100 px-1 py-0.5">flyer:</code> field, e.g.
+            <code class="rounded bg-stone-100 px-1 py-0.5">/flyers/your-event.jpg</code>.
+          </p>
         </div>
-      </div>
+      </li>
 
-      <div>
-        <label class="mb-1 block text-sm font-medium text-stone-700">Flyer / poster image</label>
-        <input type="file" accept="image/*" class="block w-full text-sm" @change="onFileChange" />
-      </div>
-
-      <p v-if="errorMsg" class="text-sm text-red-600">{{ errorMsg }}</p>
-
-      <button
-        type="submit"
-        :disabled="submitting"
-        class="w-full rounded-md bg-moss-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-moss-800 disabled:opacity-60"
-      >
-        {{ submitting ? 'Submitting…' : 'Submit for review' }}
-      </button>
-    </form>
+      <li class="flex gap-4">
+        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-moss-700 text-sm font-bold text-white">4</span>
+        <div>
+          <p class="font-medium text-stone-900">Submit the pull request</p>
+          <p class="text-sm text-stone-600">
+            Once it's merged, your event automatically appears on the
+            <NuxtLink to="/events" class="font-medium text-moss-700 hover:underline">calendar</NuxtLink>.
+          </p>
+        </div>
+      </li>
+    </ol>
   </div>
 </template>
-
-<style scoped>
-.input {
-  @apply w-full rounded-md border border-stone-300 px-3 py-2 text-sm focus:border-moss-500 focus:outline-none focus:ring-1 focus:ring-moss-500;
-}
-</style>

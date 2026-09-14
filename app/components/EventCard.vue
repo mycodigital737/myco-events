@@ -1,28 +1,26 @@
 <script setup lang="ts">
-import type { MycoEvent } from '~/types/database.types'
+import type { EventItem } from '~/types/event'
 import { EVENT_TYPE_BADGE_CLASSES, EVENT_TYPE_LABELS } from '~/utils/eventTypes'
 
-const props = defineProps<{ event: MycoEvent }>()
-
-const flyerUrl = computed(() => flyerPublicUrl(props.event.flyer_path))
+const props = defineProps<{ event: EventItem }>()
 
 const dateRange = computed(() => formatEventDateRange(props.event))
 
 const locationLabel = computed(() => {
-  if (props.event.is_online) return 'Online'
+  if (props.event.isOnline) return 'Online'
   return [props.event.city, props.event.country].filter(Boolean).join(', ') || 'Location TBA'
 })
 </script>
 
 <template>
   <NuxtLink
-    :to="`/events/${event.slug}`"
+    :to="event.path"
     class="group flex overflow-hidden rounded-xl border border-stone-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
   >
     <div class="hidden w-32 shrink-0 items-center justify-center bg-stone-100 sm:flex">
       <img
-        v-if="flyerUrl"
-        :src="flyerUrl"
+        v-if="event.flyer"
+        :src="event.flyer"
         :alt="`${event.title} flyer`"
         class="h-full w-full object-cover"
       />
@@ -33,11 +31,11 @@ const locationLabel = computed(() => {
       <div class="flex flex-wrap items-center gap-2">
         <span
           class="rounded-full px-2.5 py-0.5 text-xs font-semibold"
-          :class="EVENT_TYPE_BADGE_CLASSES[event.event_type]"
+          :class="EVENT_TYPE_BADGE_CLASSES[event.eventType]"
         >
-          {{ EVENT_TYPE_LABELS[event.event_type] }}
+          {{ EVENT_TYPE_LABELS[event.eventType] }}
         </span>
-        <span v-if="event.is_online" class="rounded-full bg-stone-100 px-2.5 py-0.5 text-xs font-semibold text-stone-600">
+        <span v-if="event.isOnline" class="rounded-full bg-stone-100 px-2.5 py-0.5 text-xs font-semibold text-stone-600">
           Online
         </span>
       </div>

@@ -3,17 +3,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
 
-  nitro: {
-    preset: 'netlify'
-  },
-
-  modules: ['@nuxtjs/supabase', '@nuxtjs/tailwindcss'],
-
-  supabase: {
-    // Everything is public by default for this site; auth is only
-    // enforced in-app (submitting/editing events, admin review).
-    redirect: false
-  },
+  modules: ['@nuxt/content', '@nuxtjs/tailwindcss'],
 
   css: ['~/assets/css/main.css'],
 
@@ -40,7 +30,8 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      siteName: 'Global Mycology Events'
+      siteName: 'Global Mycology Events',
+      githubRepo: 'mycodigital737/myco-events'
     }
   }
 })
