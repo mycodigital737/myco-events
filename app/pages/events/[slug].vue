@@ -2,11 +2,12 @@
 import { EVENT_TYPE_BADGE_CLASSES, EVENT_TYPE_LABELS } from '~/utils/eventTypes'
 
 const route = useRoute()
-const { data: event, pending } = useEventByPath(route.path)
+const slug = route.params.slug as string
+const { data: event, pending } = useEventBySlug(slug)
 
 useSeoMeta({
   title: () => (event.value ? `${event.value.title} — Global Mycology Events` : 'Event — Global Mycology Events'),
-  description: () => event.value?.description?.slice(0, 160) || 'A mycological event.'
+  description: () => event.value?.title ? `${event.value.title} — a mycological event.` : 'A mycological event.'
 })
 </script>
 
@@ -62,7 +63,8 @@ useSeoMeta({
         class="w-full max-w-md rounded-xl border border-stone-200 shadow-sm"
       />
 
-      <ContentRenderer :value="event" class="prose prose-stone max-w-none" />
+      <!-- eslint-disable-next-line vue/no-v-html -->
+      <div class="prose prose-stone max-w-none" v-html="event.descriptionHtml" />
 
       <div class="flex flex-wrap items-center gap-4 border-t border-stone-200 pt-6 text-sm">
         <a

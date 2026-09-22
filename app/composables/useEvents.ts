@@ -18,9 +18,7 @@ const DEFAULT_FILTERS: EventFilters = {
 }
 
 export function useAllEvents() {
-  return useAsyncData('all-events', () =>
-    queryCollection('events').order('startDate', 'ASC').all()
-  ) as unknown as { data: Ref<EventItem[] | null>; pending: Ref<boolean>; error: Ref<unknown> }
+  return useFetch<EventItem[]>('/api/events', { key: 'all-events', default: () => [] })
 }
 
 export function useEvents(initialFilters: Partial<EventFilters> = {}) {
@@ -54,7 +52,7 @@ export function useEvents(initialFilters: Partial<EventFilters> = {}) {
     if (filters.search.trim()) {
       const term = filters.search.trim().toLowerCase()
       list = list.filter((e) =>
-        [e.title, e.description, e.city, e.country, e.venueName]
+        [e.title, e.city, e.country, e.venueName]
           .filter(Boolean)
           .some((field) => String(field).toLowerCase().includes(term))
       )
@@ -69,10 +67,8 @@ export function useEvents(initialFilters: Partial<EventFilters> = {}) {
   return { events, filters, pending, error }
 }
 
-export function useEventByPath(path: string) {
-  return useAsyncData(`event-${path}`, () =>
-    queryCollection('events').path(path).first()
-  ) as unknown as { data: Ref<EventItem | null>; pending: Ref<boolean>; error: Ref<unknown> }
+export function useEventBySlug(slug: string) {
+  return useFetch<EventItem>(`/api/events/${slug}`, { key: `event-${slug}` })
 }
 
 export function uniqueCountries(events: EventItem[]): string[] {

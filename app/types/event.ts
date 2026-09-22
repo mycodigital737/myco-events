@@ -1,6 +1,7 @@
 import type { EventType } from '~/utils/eventTypes'
 
 export interface EventItem {
+  slug: string
   path: string
   title: string
   eventType: EventType
@@ -18,6 +19,5 @@ export interface EventItem {
   contactEmail?: string
   flyer?: string
   organizer?: string
-  description?: string
-  [key: string]: unknown
+  descriptionHtml: string
 }
