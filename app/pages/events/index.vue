@@ -17,15 +17,7 @@ const countries = computed(() => uniqueCountries(allEvents.value ?? []))
 
       <div v-if="pending" class="text-cream-300/60">Loading events…</div>
       <div v-else-if="error" class="rounded-md bg-red-950 p-4 text-red-300">Something went wrong loading events.</div>
-      <div
-        v-else-if="events.length === 0"
-        class="rounded-xl border border-dashed border-stone-800 p-10 text-center text-cream-300/60"
-      >
-        No events match your filters.
-      </div>
-      <div v-else class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <EventCard v-for="event in events" :key="event.path" :event="event" />
-      </div>
+      <EventCalendarGrid v-else :events="events" />
     </div>
   </div>
 </template>

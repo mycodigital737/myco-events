@@ -1,3 +1,14 @@
+import { readdirSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
+
+// The events calendar UI only ever links to events in the month it
+// currently has open, so Nitro's link-crawler alone can't find event
+// pages outside that month at prerender time. List every event route
+// explicitly so `nuxt generate` always emits a static page for each one.
+const eventRoutes = readdirSync(fileURLToPath(new URL('./content/events', import.meta.url)))
+  .filter((file) => file.endsWith('.md'))
+  .map((file) => `/events/${file.replace(/\.md$/, '')}`)
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
@@ -6,6 +17,12 @@ export default defineNuxtConfig({
   modules: ['@nuxtjs/tailwindcss'],
 
   css: ['~/assets/css/main.css'],
+
+  nitro: {
+    prerender: {
+      routes: eventRoutes
+    }
+  },
 
   app: {
     head: {

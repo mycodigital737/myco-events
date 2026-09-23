@@ -30,3 +30,13 @@ export const EVENT_TYPE_BADGE_CLASSES: Record<EventType, string> = {
   expo: 'bg-indigo-100 text-indigo-800',
   other: 'bg-stone-200 text-stone-700'
 }
+
+export const EVENT_TYPE_ICON_BG: Record<EventType, string> = {
+  foray: 'bg-moss-600',
+  conference: 'bg-sky-600',
+  workshop: 'bg-amber-600',
+  festival: 'bg-fuchsia-600',
+  club_meeting: 'bg-teal-600',
+  expo: 'bg-indigo-600',
+  other: 'bg-stone-600'
+}
