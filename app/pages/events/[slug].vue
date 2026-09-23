@@ -36,8 +36,8 @@ useSeoMeta({
       <h1 class="font-display text-3xl font-bold text-cream-100 sm:text-4xl">{{ event.title }}</h1>
 
       <div class="flex flex-wrap gap-x-6 gap-y-2 text-cream-300/70">
-        <span class="flex items-center gap-1.5">{{ formatDateTime(event.startDate) }}</span>
-        <span v-if="event.endDate" class="flex items-center gap-1.5">→ {{ formatDateTime(event.endDate) }}</span>
+        <span class="flex items-center gap-1.5">{{ formatDateTime(event.startDate, event.timezone) }}</span>
+        <span v-if="event.endDate" class="flex items-center gap-1.5">→ {{ formatDateTime(event.endDate, event.timezone) }}</span>
         <span class="flex items-center gap-1.5">{{ event.timezone }}</span>
       </div>
 
