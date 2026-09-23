@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import type { EventItem } from '~/types/event'
-import { EVENT_TYPE_ICON_BG } from '~/utils/eventTypes'
 
 const props = defineProps<{ events: EventItem[] }>()
 
+// "YYYY-MM" — shared with a parent's month-jump dropdown so it can
+// drive the same view this component's own prev/next arrows do.
+const selectedMonth = defineModel<string>('selectedMonth', { required: true })
+
+const viewYear = computed(() => Number(selectedMonth.value.split('-')[0]))
+const viewMonth = computed(() => Number(selectedMonth.value.split('-')[1]) - 1) // 0-indexed
+
 const today = new Date()
-const viewYear = ref(today.getFullYear())
-const viewMonth = ref(today.getMonth()) // 0-indexed
 
 const monthLabel = computed(() =>
   new Date(viewYear.value, viewMonth.value, 1).toLocaleDateString(undefined, {
@@ -14,6 +18,10 @@ const monthLabel = computed(() =>
     year: 'numeric'
   })
 )
+
+function setMonth(year: number, month: number) {
+  selectedMonth.value = `${year}-${String(month + 1).padStart(2, '0')}`
+}
 
 function toKey(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
@@ -76,25 +84,19 @@ function dayEvents(d: Date) {
 }
 
 function prevMonth() {
-  if (viewMonth.value === 0) {
-    viewMonth.value = 11
-    viewYear.value -= 1
-  } else {
-    viewMonth.value -= 1
-  }
+  if (viewMonth.value === 0) setMonth(viewYear.value - 1, 11)
+  else setMonth(viewYear.value, viewMonth.value - 1)
 }
 
 function nextMonth() {
-  if (viewMonth.value === 11) {
-    viewMonth.value = 0
-    viewYear.value += 1
-  } else {
-    viewMonth.value += 1
-  }
+  if (viewMonth.value === 11) setMonth(viewYear.value + 1, 0)
+  else setMonth(viewYear.value, viewMonth.value + 1)
 }
 
 const weekdayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-const MAX_ICONS_PER_DAY = 3
+// Generous — this is meant to be readable at a glance, not a compact
+// list, so we'd rather let a busy day grow the row than hide entries.
+const MAX_VISIBLE_PER_DAY = 6
 </script>
 
 <template>
@@ -102,16 +104,16 @@ const MAX_ICONS_PER_DAY = 3
     <div class="mb-3 flex items-center justify-between px-1">
       <button
         type="button"
-        class="rounded-md p-1.5 text-cream-300/70 hover:bg-stone-900"
+        class="rounded-md p-2 text-cream-300/70 hover:bg-stone-900"
         aria-label="Previous month"
         @click="prevMonth"
       >
         ←
       </button>
-      <h2 class="font-display text-lg font-semibold text-cream-100">{{ monthLabel }}</h2>
+      <h2 class="font-display text-xl font-semibold text-cream-100 sm:text-2xl">{{ monthLabel }}</h2>
       <button
         type="button"
-        class="rounded-md p-1.5 text-cream-300/70 hover:bg-stone-900"
+        class="rounded-md p-2 text-cream-300/70 hover:bg-stone-900"
         aria-label="Next month"
         @click="nextMonth"
       >
@@ -119,49 +121,52 @@ const MAX_ICONS_PER_DAY = 3
       </button>
     </div>
 
-    <div class="grid grid-cols-7 gap-1 text-center text-[11px] font-semibold uppercase tracking-wide text-cream-300/40 sm:text-xs">
-      <div v-for="d in weekdayLabels" :key="d" class="py-1">{{ d }}</div>
-    </div>
+    <p class="mb-2 text-center text-xs text-cream-300/40 sm:hidden">↔ Swipe to see the rest of the week</p>
 
-    <div class="grid grid-cols-7 gap-1">
-      <div
-        v-for="day in weeks.flat()"
-        :key="day.toISOString()"
-        class="flex min-h-[72px] flex-col gap-1 rounded-lg border p-1 sm:min-h-[104px] sm:p-1.5"
-        :class="[
-          isCurrentMonth(day) ? 'border-stone-800' : 'border-transparent',
-          isToday(day) ? 'ring-1 ring-moss-400' : ''
-        ]"
-      >
-        <span
-          class="text-xs font-medium"
-          :class="isCurrentMonth(day) ? 'text-cream-300/60' : 'text-stone-700'"
-        >
-          {{ day.getDate() }}
-        </span>
+    <div class="overflow-x-auto">
+      <div class="min-w-[820px]">
+        <div class="grid grid-cols-7 gap-1 text-center text-sm font-semibold uppercase tracking-wide text-cream-300/40">
+          <div v-for="d in weekdayLabels" :key="d" class="py-1">{{ d }}</div>
+        </div>
 
-        <div v-if="isCurrentMonth(day) && dayEvents(day).length" class="flex flex-wrap gap-1">
-          <NuxtLink
-            v-for="event in dayEvents(day).slice(0, MAX_ICONS_PER_DAY)"
-            :key="event.path"
-            :to="event.path"
-            :title="event.title"
-            class="block h-7 w-7 shrink-0 overflow-hidden rounded-md border border-stone-700 transition hover:scale-105 sm:h-9 sm:w-9"
+        <div class="grid grid-cols-7 gap-1">
+          <div
+            v-for="day in weeks.flat()"
+            :key="day.toISOString()"
+            class="flex min-h-[190px] flex-col gap-1.5 rounded-lg border p-2"
+            :class="[
+              isCurrentMonth(day) ? 'border-stone-800' : 'border-transparent',
+              isToday(day) ? 'ring-2 ring-moss-400' : ''
+            ]"
           >
-            <img
-              v-if="event.flyer"
-              :src="event.flyer"
-              :alt="`${event.title} flyer`"
-              class="h-full w-full object-cover"
-            />
-            <span v-else class="block h-full w-full" :class="EVENT_TYPE_ICON_BG[event.eventType]" />
-          </NuxtLink>
-          <span
-            v-if="dayEvents(day).length > MAX_ICONS_PER_DAY"
-            class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-stone-900 text-[10px] font-semibold text-cream-300/60 sm:h-9 sm:w-9"
-          >
-            +{{ dayEvents(day).length - MAX_ICONS_PER_DAY }}
-          </span>
+            <span
+              class="shrink-0 text-base font-semibold"
+              :class="isCurrentMonth(day) ? 'text-cream-300/70' : 'text-stone-700'"
+            >
+              {{ day.getDate() }}
+            </span>
+
+            <div v-if="isCurrentMonth(day) && dayEvents(day).length" class="flex flex-col gap-1">
+              <NuxtLink
+                v-for="event in dayEvents(day).slice(0, MAX_VISIBLE_PER_DAY)"
+                :key="event.path"
+                :to="event.path"
+                :title="event.title"
+                class="flex items-start gap-1.5 rounded px-1 py-0.5 hover:bg-stone-900"
+              >
+                <span class="mt-0.5 h-6 w-6 shrink-0 overflow-hidden rounded-sm">
+                  <EventIcon :event="event" variant="tile" />
+                </span>
+                <span class="line-clamp-2 min-w-0 flex-1 text-sm font-medium leading-tight text-cream-100">{{ event.title }}</span>
+              </NuxtLink>
+              <span
+                v-if="dayEvents(day).length > MAX_VISIBLE_PER_DAY"
+                class="px-1 text-xs font-medium text-cream-300/50"
+              >
+                +{{ dayEvents(day).length - MAX_VISIBLE_PER_DAY }} more
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </div>

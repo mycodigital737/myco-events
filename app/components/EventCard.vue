@@ -21,15 +21,7 @@ const locationLabel = computed(() => {
     class="group flex flex-col overflow-hidden rounded-xl border border-stone-800 bg-stone-950 shadow-sm transition hover:-translate-y-0.5 hover:border-stone-700"
   >
     <div class="relative h-40 w-full shrink-0 overflow-hidden bg-stone-900">
-      <img
-        v-if="event.flyer"
-        :src="event.flyer"
-        :alt="`${event.title} flyer`"
-        class="h-full w-full object-cover"
-      />
-      <div v-else class="flex h-full w-full items-center justify-center text-xs font-medium uppercase tracking-wide text-cream-300/30">
-        No flyer
-      </div>
+      <EventIcon :event="event" variant="card" />
 
       <div class="absolute left-3 top-3 flex flex-col items-center rounded-lg bg-black/85 px-3 py-1.5 leading-none">
         <span class="text-[10px] font-bold uppercase tracking-wide text-spore-400">{{ month }}</span>

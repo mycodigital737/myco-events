@@ -3,6 +3,11 @@ const { events, filters, pending, error } = useEvents()
 const { data: allEvents } = useAllEvents()
 
 const countries = computed(() => uniqueCountries(allEvents.value ?? []))
+const regions = computed(() => uniqueRegions(allEvents.value ?? []))
+const monthOptions = computed(() => monthOptionsFrom(allEvents.value ?? []))
+
+const now = new Date()
+const selectedMonth = ref(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`)
 </script>
 
 <template>
@@ -13,11 +18,17 @@ const countries = computed(() => uniqueCountries(allEvents.value ?? []))
     </div>
 
     <div class="space-y-6">
-      <EventFilters v-model="filters" :countries="countries" />
+      <EventFilters
+        v-model="filters"
+        v-model:month="selectedMonth"
+        :countries="countries"
+        :regions="regions"
+        :month-options="monthOptions"
+      />
 
       <div v-if="pending" class="text-cream-300/60">Loading events…</div>
       <div v-else-if="error" class="rounded-md bg-red-950 p-4 text-red-300">Something went wrong loading events.</div>
-      <EventCalendarGrid v-else :events="events" />
+      <EventCalendarGrid v-else v-model:selected-month="selectedMonth" :events="events" />
     </div>
   </div>
 </template>
