@@ -3,9 +3,13 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 body {
-  @apply bg-stone-50 text-stone-900 antialiased;
+  @apply bg-black text-cream-200 antialiased;
+}
+
+::selection {
+  @apply bg-moss-700 text-cream-100;
 }

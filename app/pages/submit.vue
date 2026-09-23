@@ -40,14 +40,14 @@ function copyTemplate() {
 
 <template>
   <div class="mx-auto max-w-3xl px-4 py-10 sm:px-6">
-    <h1 class="font-display text-3xl font-bold text-stone-900">Add an event</h1>
-    <p class="mt-2 text-stone-600">
+    <h1 class="font-display text-3xl font-bold text-cream-100">Add an event</h1>
+    <p class="mt-2 text-cream-300/70">
       This calendar is powered by plain markdown files in our
       <a
         :href="`https://github.com/${config.public.githubRepo}/tree/main/content/events`"
         target="_blank"
         rel="noopener"
-        class="font-medium text-moss-700 hover:underline"
+        class="font-medium text-moss-400 hover:underline"
         >GitHub repository</a
       >. Adding your foray, conference, workshop or festival is a two-minute
       pull request — no account or sign-in needed here, just a (free)
@@ -56,15 +56,15 @@ function copyTemplate() {
 
     <ol class="mt-8 space-y-6">
       <li class="flex gap-4">
-        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-moss-700 text-sm font-bold text-white">1</span>
+        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-moss-700 text-sm font-bold text-cream-100">1</span>
         <div>
-          <p class="font-medium text-stone-900">Copy the event template</p>
-          <p class="text-sm text-stone-600">Fill in your event's details in this frontmatter format.</p>
+          <p class="font-medium text-cream-100">Copy the event template</p>
+          <p class="text-sm text-cream-300/60">Fill in your event's details in this frontmatter format.</p>
           <div class="relative mt-2">
-            <pre class="overflow-x-auto rounded-lg bg-stone-900 p-4 text-xs leading-relaxed text-stone-100"><code>{{ template }}</code></pre>
+            <pre class="overflow-x-auto rounded-lg border border-stone-800 bg-stone-950 p-4 text-xs leading-relaxed text-cream-200"><code>{{ template }}</code></pre>
             <button
               type="button"
-              class="absolute right-2 top-2 rounded-md bg-stone-700 px-2 py-1 text-xs font-medium text-white hover:bg-stone-600"
+              class="absolute right-2 top-2 rounded-md bg-stone-800 px-2 py-1 text-xs font-medium text-cream-100 hover:bg-stone-700"
               @click="copyTemplate"
             >
               {{ copied ? 'Copied!' : 'Copy' }}
@@ -74,21 +74,21 @@ function copyTemplate() {
       </li>
 
       <li class="flex gap-4">
-        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-moss-700 text-sm font-bold text-white">2</span>
+        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-moss-700 text-sm font-bold text-cream-100">2</span>
         <div>
-          <p class="font-medium text-stone-900">Create the file on GitHub</p>
-          <p class="text-sm text-stone-600">
+          <p class="font-medium text-cream-100">Create the file on GitHub</p>
+          <p class="text-sm text-cream-300/60">
             Click below to open a new file, pre-filled with the template, directly in
-            <code class="rounded bg-stone-100 px-1 py-0.5">content/events/</code>. Rename the file to
-            something like <code class="rounded bg-stone-100 px-1 py-0.5">2026-your-event-name.md</code>,
+            <code class="rounded bg-stone-900 px-1 py-0.5 text-cream-200">content/events/</code>. Rename the file to
+            something like <code class="rounded bg-stone-900 px-1 py-0.5 text-cream-200">2026-your-event-name.md</code>,
             edit the details, then scroll down and choose
-            <strong>"Create a new branch and start a pull request."</strong>
+            <strong class="text-cream-100">"Create a new branch and start a pull request."</strong>
           </p>
           <a
             :href="githubNewFileUrl"
             target="_blank"
             rel="noopener"
-            class="mt-3 inline-block rounded-md bg-moss-700 px-4 py-2 text-sm font-semibold text-white hover:bg-moss-800"
+            class="mt-3 inline-block rounded-md bg-moss-700 px-4 py-2 text-sm font-semibold text-cream-100 hover:bg-moss-600"
           >
             Create event file on GitHub ↗
           </a>
@@ -96,26 +96,26 @@ function copyTemplate() {
       </li>
 
       <li class="flex gap-4">
-        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-moss-700 text-sm font-bold text-white">3</span>
+        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-moss-700 text-sm font-bold text-cream-100">3</span>
         <div>
-          <p class="font-medium text-stone-900">(Optional) Add a flyer or poster</p>
-          <p class="text-sm text-stone-600">
+          <p class="font-medium text-cream-100">(Optional) Add a flyer or poster</p>
+          <p class="text-sm text-cream-300/60">
             Upload your flyer image to
-            <code class="rounded bg-stone-100 px-1 py-0.5">public/flyers/</code>
+            <code class="rounded bg-stone-900 px-1 py-0.5 text-cream-200">public/flyers/</code>
             in the same pull request, and reference it in the
-            <code class="rounded bg-stone-100 px-1 py-0.5">flyer:</code> field, e.g.
-            <code class="rounded bg-stone-100 px-1 py-0.5">/flyers/your-event.jpg</code>.
+            <code class="rounded bg-stone-900 px-1 py-0.5 text-cream-200">flyer:</code> field, e.g.
+            <code class="rounded bg-stone-900 px-1 py-0.5 text-cream-200">/flyers/your-event.jpg</code>.
           </p>
         </div>
       </li>
 
       <li class="flex gap-4">
-        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-moss-700 text-sm font-bold text-white">4</span>
+        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-moss-700 text-sm font-bold text-cream-100">4</span>
         <div>
-          <p class="font-medium text-stone-900">Submit the pull request</p>
-          <p class="text-sm text-stone-600">
+          <p class="font-medium text-cream-100">Submit the pull request</p>
+          <p class="text-sm text-cream-300/60">
             Once it's merged, your event automatically appears on the
-            <NuxtLink to="/events" class="font-medium text-moss-700 hover:underline">calendar</NuxtLink>.
+            <NuxtLink to="/events" class="font-medium text-moss-400 hover:underline">calendar</NuxtLink>.
           </p>
         </div>
       </li>

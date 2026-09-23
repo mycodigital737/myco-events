@@ -23,8 +23,8 @@ const visibleEvents = computed(() => {
 <template>
   <div class="mx-auto max-w-6xl px-4 py-10 sm:px-6">
     <div class="mb-6">
-      <h1 class="font-display text-3xl font-bold text-stone-900">Global Mycology Calendar</h1>
-      <p class="mt-1 text-stone-600">Forays, conferences, workshops and festivals from around the world.</p>
+      <h1 class="font-display text-3xl font-bold text-cream-100">Global Myco Event Calendar</h1>
+      <p class="mt-1 text-cream-300/70">Forays, conferences, workshops and festivals from around the world.</p>
     </div>
 
     <div class="grid gap-6 lg:grid-cols-[320px_1fr]">
@@ -35,11 +35,11 @@ const visibleEvents = computed(() => {
       <div class="space-y-6">
         <EventFilters v-model="filters" :countries="countries" />
 
-        <div v-if="pending" class="text-stone-500">Loading events…</div>
-        <div v-else-if="error" class="rounded-md bg-red-50 p-4 text-red-700">Something went wrong loading events.</div>
+        <div v-if="pending" class="text-cream-300/60">Loading events…</div>
+        <div v-else-if="error" class="rounded-md bg-red-950 p-4 text-red-300">Something went wrong loading events.</div>
         <div
           v-else-if="visibleEvents.length === 0"
-          class="rounded-xl border border-dashed border-stone-300 p-10 text-center text-stone-500"
+          class="rounded-xl border border-dashed border-stone-800 p-10 text-center text-cream-300/60"
         >
           No events match your filters.
         </div>

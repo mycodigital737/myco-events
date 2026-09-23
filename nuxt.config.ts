@@ -9,7 +9,7 @@ export default defineNuxtConfig({
 
   app: {
     head: {
-      title: 'Global Mycology Events',
+      title: 'Global Myco Event Calendar',
       meta: [
         {
           name: 'description',
@@ -30,7 +30,7 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      siteName: 'Global Mycology Events',
+      siteName: 'Global Myco Event Calendar',
       githubRepo: 'mycodigital737/myco-events'
     }
   }

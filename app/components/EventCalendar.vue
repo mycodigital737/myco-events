@@ -97,20 +97,20 @@ const weekdayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 </script>
 
 <template>
-  <div class="rounded-xl border border-stone-200 bg-white p-4 shadow-sm">
+  <div class="rounded-xl border border-stone-800 bg-stone-950 p-4 shadow-sm">
     <div class="mb-3 flex items-center justify-between">
       <button
         type="button"
-        class="rounded-md p-1.5 text-stone-500 hover:bg-stone-100"
+        class="rounded-md p-1.5 text-cream-300/70 hover:bg-stone-900"
         aria-label="Previous month"
         @click="prevMonth"
       >
         ←
       </button>
-      <h2 class="font-display text-base font-semibold text-stone-800">{{ monthLabel }}</h2>
+      <h2 class="font-display text-base font-semibold text-cream-100">{{ monthLabel }}</h2>
       <button
         type="button"
-        class="rounded-md p-1.5 text-stone-500 hover:bg-stone-100"
+        class="rounded-md p-1.5 text-cream-300/70 hover:bg-stone-900"
         aria-label="Next month"
         @click="nextMonth"
       >
@@ -118,7 +118,7 @@ const weekdayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
       </button>
     </div>
 
-    <div class="grid grid-cols-7 gap-1 text-center text-xs font-semibold text-stone-400">
+    <div class="grid grid-cols-7 gap-1 text-center text-xs font-semibold text-cream-300/40">
       <div v-for="d in weekdayLabels" :key="d" class="py-1">{{ d }}</div>
     </div>
 
@@ -129,8 +129,8 @@ const weekdayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
         type="button"
         class="relative aspect-square rounded-md p-1 text-sm transition"
         :class="[
-          isCurrentMonth(day) ? 'text-stone-700' : 'text-stone-300',
-          selectedDate === toKey(day) ? 'bg-moss-700 text-white' : 'hover:bg-moss-50',
+          isCurrentMonth(day) ? 'text-cream-200' : 'text-stone-700',
+          selectedDate === toKey(day) ? 'bg-moss-700 text-cream-100' : 'hover:bg-moss-950',
           isToday(day) && selectedDate !== toKey(day) ? 'ring-1 ring-moss-400' : ''
         ]"
         @click="selectDay(day)"
@@ -139,7 +139,7 @@ const weekdayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
         <span
           v-if="eventCount(day) > 0"
           class="absolute bottom-1 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full"
-          :class="selectedDate === toKey(day) ? 'bg-white' : 'bg-spore-500'"
+          :class="selectedDate === toKey(day) ? 'bg-cream-100' : 'bg-spore-500'"
         />
       </button>
     </div>
@@ -147,7 +147,7 @@ const weekdayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
     <button
       v-if="selectedDate"
       type="button"
-      class="mt-3 text-xs font-medium text-moss-700 hover:underline"
+      class="mt-3 text-xs font-medium text-moss-400 hover:underline"
       @click="selectedDate = null"
     >
       Clear selected date

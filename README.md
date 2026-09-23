@@ -1,11 +1,12 @@
-# Global Mycology Events
+# Global Myco Event Calendar
 
 A community calendar for domestic and international mycological events —
 forays, conferences, workshops, club meetings and festivals.
 
-Built as a **static site** with [Nuxt 4](https://nuxt.com) and
-[Nuxt Content](https://content.nuxt.com): events are plain markdown files
-in this repo, and anyone can add one by opening a pull request — no
+Built as a **static site** with [Nuxt 4](https://nuxt.com): events are
+plain markdown files in this repo, parsed at build time (via
+`gray-matter` + `marked`, no database), and anyone can add one by
+opening a pull request — no
 database, login, or backend required.
 
 > A Supabase-backed version (accounts, a submission form with flyer
@@ -29,14 +30,16 @@ database, login, or backend required.
 
 ```
 content/events/*.md    One markdown file per event (frontmatter + description)
+server/
+  utils/events.ts       Parses content/events/*.md with gray-matter + marked
+  api/events/            GET /api/events and /api/events/[slug]
 app/
   components/          EventCard, EventCalendar, EventFilters, header/footer
-  composables/          useEvents, useAllEvents, useEventByPath (Nuxt Content queries)
+  composables/          useEvents, useAllEvents, useEventBySlug (fetch the server API)
   layouts/              default layout (header + footer)
-  pages/                /, /events, /events/[...slug], /submit
+  pages/                /, /events, /events/[slug], /submit
   types/event.ts         EventItem shape
   utils/                 event type labels, date formatting
-content.config.ts       Nuxt Content collection schema for events
 public/flyers/          Flyer/poster images referenced from event frontmatter
 supabase/                On hold — schema for a future Supabase-backed version
 ```

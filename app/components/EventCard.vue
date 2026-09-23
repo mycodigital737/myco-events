@@ -15,9 +15,9 @@ const locationLabel = computed(() => {
 <template>
   <NuxtLink
     :to="event.path"
-    class="group flex overflow-hidden rounded-xl border border-stone-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+    class="group flex overflow-hidden rounded-xl border border-stone-800 bg-stone-950 shadow-sm transition hover:-translate-y-0.5 hover:border-stone-700"
   >
-    <div class="hidden w-32 shrink-0 items-center justify-center bg-stone-100 sm:flex">
+    <div class="hidden w-32 shrink-0 items-center justify-center bg-stone-900 sm:flex">
       <img
         v-if="event.flyer"
         :src="event.flyer"
@@ -35,16 +35,16 @@ const locationLabel = computed(() => {
         >
           {{ EVENT_TYPE_LABELS[event.eventType] }}
         </span>
-        <span v-if="event.isOnline" class="rounded-full bg-stone-100 px-2.5 py-0.5 text-xs font-semibold text-stone-600">
+        <span v-if="event.isOnline" class="rounded-full bg-stone-800 px-2.5 py-0.5 text-xs font-semibold text-cream-300">
           Online
         </span>
       </div>
 
-      <h3 class="font-display text-lg font-semibold text-stone-900 group-hover:text-moss-700">
+      <h3 class="font-display text-lg font-semibold text-cream-100 group-hover:text-moss-400">
         {{ event.title }}
       </h3>
 
-      <div class="mt-auto flex flex-wrap gap-x-4 gap-y-1 text-sm text-stone-500">
+      <div class="mt-auto flex flex-wrap gap-x-4 gap-y-1 text-sm text-cream-300/60">
         <span class="flex items-center gap-1">📅 {{ dateRange }}</span>
         <span class="flex items-center gap-1">📍 {{ locationLabel }}</span>
       </div>
