@@ -24,7 +24,7 @@ const locationLabel = computed(() => {
         :alt="`${event.title} flyer`"
         class="h-full w-full object-cover"
       />
-      <span v-else class="text-4xl">🍄</span>
+      <span v-else class="text-xs font-medium uppercase tracking-wide text-cream-300/30">No flyer</span>
     </div>
 
     <div class="flex flex-1 flex-col gap-2 p-4">
@@ -45,8 +45,8 @@ const locationLabel = computed(() => {
       </h3>
 
       <div class="mt-auto flex flex-wrap gap-x-4 gap-y-1 text-sm text-cream-300/60">
-        <span class="flex items-center gap-1">📅 {{ dateRange }}</span>
-        <span class="flex items-center gap-1">📍 {{ locationLabel }}</span>
+        <span class="flex items-center gap-1">{{ dateRange }}</span>
+        <span class="flex items-center gap-1">{{ locationLabel }}</span>
       </div>
     </div>
   </NuxtLink>

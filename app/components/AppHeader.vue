@@ -6,9 +6,8 @@ const mobileOpen = ref(false)
 <template>
   <header class="border-b border-stone-800 bg-black">
     <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
-      <NuxtLink to="/" class="flex items-center gap-2 font-display text-lg font-semibold text-cream-100">
-        <span aria-hidden="true">🍄</span>
-        <span>Global Myco Event Calendar</span>
+      <NuxtLink to="/" class="font-display text-lg font-semibold text-cream-100">
+        Global Myco Event Calendar
       </NuxtLink>
 
       <nav class="hidden items-center gap-6 text-sm font-medium text-cream-300/70 md:flex">

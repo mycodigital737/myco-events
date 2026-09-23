@@ -36,20 +36,19 @@ useSeoMeta({
       <h1 class="font-display text-3xl font-bold text-cream-100 sm:text-4xl">{{ event.title }}</h1>
 
       <div class="flex flex-wrap gap-x-6 gap-y-2 text-cream-300/70">
-        <span class="flex items-center gap-1.5">📅 {{ formatDateTime(event.startDate) }}</span>
+        <span class="flex items-center gap-1.5">{{ formatDateTime(event.startDate) }}</span>
         <span v-if="event.endDate" class="flex items-center gap-1.5">→ {{ formatDateTime(event.endDate) }}</span>
-        <span class="flex items-center gap-1.5">🌐 {{ event.timezone }}</span>
+        <span class="flex items-center gap-1.5">{{ event.timezone }}</span>
       </div>
 
       <div class="flex flex-wrap gap-x-6 gap-y-2 text-cream-300/70">
         <span v-if="event.isOnline" class="flex items-center gap-1.5">
-          💻 Online event
+          Online event
           <a v-if="event.onlineUrl" :href="event.onlineUrl" target="_blank" rel="noopener" class="font-medium text-moss-400 hover:underline">
             Join link
           </a>
         </span>
         <span v-else class="flex items-center gap-1.5">
-          📍
           <span>
             {{ [event.venueName, event.address, event.city, event.region, event.country].filter(Boolean).join(', ') }}
           </span>
